@@ -3,7 +3,17 @@ import * as React from 'react';
 import autobind from 'autobind-decorator';
 import classnames from 'classnames';
 import PageLayout from './page-layout';
-import { Breadcrumb, Button, Dropdown, DropdownItem, Header, SvgIcon } from 'insomnia-components';
+import {
+  Breadcrumb,
+  Button,
+  Dropdown,
+  DropdownItem,
+  Header,
+  SvgIcon,
+  ListGroup,
+  ListGroupItem,
+  UnitTestResultItem,
+} from 'insomnia-components';
 import ErrorBoundary from './error-boundary';
 import CodeEditor from './codemirror/code-editor';
 import designerLogo from '../images/insomnia-designer-logo.svg';
@@ -327,19 +337,11 @@ class WrapperUnitTest extends React.PureComponent<Props, State> {
                 </h2>
               )}
             </div>
-            <ul>
+            <ListGroup>
               {tests.map((t, i) => (
-                <li key={i}>
-                  <SvgIcon icon={t.err.message ? 'error' : 'success'} /> {t.title} ({t.duration} ms)
-                  {t.err.message && (
-                    <>
-                      <br />
-                      <code className="text-danger">{t.err.message}</code>
-                    </>
-                  )}
-                </li>
+                <UnitTestResultItem key={i} item={t} />
               ))}
-            </ul>
+            </ListGroup>
           </div>
         )}
       </div>
@@ -353,7 +355,7 @@ class WrapperUnitTest extends React.PureComponent<Props, State> {
     const selectableRequests = this.buildSelectableRequests();
 
     return (
-      <div key={unitTest._id} className="unit-tests__tests__block">
+      <ListGroupItem key={unitTest._id}>
         <div className="unit-tests__tests__block__header">
           <h2 className="pad-left-md">
             <Editable
@@ -378,19 +380,15 @@ class WrapperUnitTest extends React.PureComponent<Props, State> {
               ))}
             </select>
           </div>
-          <Dropdown
-            renderButton={() => (
-              <Button variant="outlined">
-                <SvgIcon icon="gear" />
-              </Button>
-            )}>
-            <DropdownItem
-              disabled={testsRunning && testsRunning.find(t => t._id === unitTest._id)}
-              onClick={() => this._handleRunTest(unitTest)}>
-              Run Test
-            </DropdownItem>
-            <DropdownItem onClick={() => this._handleDeleteTest(unitTest)}>Delete</DropdownItem>
-          </Dropdown>
+          <Button
+            variant="text"
+            disabled={testsRunning && testsRunning.find(t => t._id === unitTest._id)}
+            onClick={() => this._handleRunTest(unitTest)}>
+            <SvgIcon icon="play" />
+          </Button>
+          <Button variant="text" onClick={() => this._handleDeleteTest(unitTest)}>
+            <SvgIcon icon="trashcan" />
+          </Button>
         </div>
         <CodeEditor
           dynamicHeight
@@ -409,7 +407,7 @@ class WrapperUnitTest extends React.PureComponent<Props, State> {
           lineWrapping={settings.editorLineWrapping}
           placeholder=""
         />
-      </div>
+      </ListGroupItem>
     );
   }
 
@@ -446,9 +444,10 @@ class WrapperUnitTest extends React.PureComponent<Props, State> {
               size="default"
               disabled={testsRunning}>
               {testsRunning ? 'Running... ' : 'Run Tests'}
+              <i className="fa fa-play space-left"></i>
             </Button>
           </div>
-          {activeUnitTests.map(this.renderUnitTest)}
+          <ListGroup>{activeUnitTests.map(this.renderUnitTest)}</ListGroup>
         </div>
         {this.renderResults()}
       </div>
@@ -464,7 +463,7 @@ class WrapperUnitTest extends React.PureComponent<Props, State> {
       <ErrorBoundary showAlert>
         <div className="unit-tests__sidebar">
           <div className="pad-sm">
-            <Button variant="outlined" bg="surprise" onClick={this._handleCreateTestSuite}>
+            <Button variant="outlined" onClick={this._handleCreateTestSuite}>
               New Test Suite
             </Button>
           </div>
